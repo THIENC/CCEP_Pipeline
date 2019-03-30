@@ -30,6 +30,17 @@ S.bc = 0;
 S.trl = trl;
 D = spm_eeg_epochs(S);
 
+%filter
+S.D = D;
+S.band = 'bandpass';
+S.freq = [1 300];
+D = spm_eeg_filter(S);
+
+%baseline correction
+S.D = D;
+D = spm_eeg_bc(S);    % when epoching we have the negtive time , so dont need to set the timewindow
+
+
 
 
 
