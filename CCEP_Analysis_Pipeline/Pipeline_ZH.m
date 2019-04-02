@@ -15,7 +15,7 @@ BinTrigger = (TriggerChannel >= threshold);
 timeStamps = diff(BinTrigger);
 timeStampNew = find(timeStamps == 1);
 
-%define the trl
+% define the trl
 k_sample = D.fsample/1000;         %sampling rate is different!
 for i = 1:40
     trl(i,1)=timeStampNew(i)-100*k_sample;
@@ -23,22 +23,31 @@ for i = 1:40
     trl(i,3)=-100*k_sample;
 end
 
-%Epoching
+% Epoching
 D = spm_eeg_load();
 S.D = D;
 S.bc = 0;
 S.trl = trl;
 D = spm_eeg_epochs(S);
 
-%filter
+% filter
 S.D = D;
 S.band = 'bandpass';
 S.freq = [1 300];
 D = spm_eeg_filter(S);
 
-%baseline correction
+% baseline correction
 S.D = D;
 D = spm_eeg_bc(S);    % when epoching we have the negtive time , so dont need to set the timewindow
+
+% rename the electrode
+Channel_Renaming_UI;  
+
+                     % then delete the '-Ref' artificially
+
+% montage bipolar
+S = D;
+D = SPM_bipolar_montage(S,'BipM_');
 
 
 
@@ -64,3 +73,24 @@ D = spm_eeg_epochs(S);
 figure;
 plot(D(1,:,1));
 
+
+
+D = spm_eeg_load();
+for i = 1:133 
+ChannelInd = i;
+Data = squeeze(D(ChannelInd,:,:));
+figure
+plot(Data)
+axis tight
+end
+idx = kmeans(Data',2)
+
+figure
+hold on
+for i = 1:40
+    if idx(i) == 1
+        plot(Data(:,i),'r')
+    elseif idx(i) == 2
+        plot(Data(:,i),'g')
+    end
+end
