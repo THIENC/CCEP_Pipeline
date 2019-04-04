@@ -28,6 +28,7 @@ D = spm_eeg_load();
 S.D = D;
 S.bc = 0;
 S.trl = trl;
+S.prefix = 'e';
 D = spm_eeg_epochs(S);
 
 % filter
@@ -53,13 +54,22 @@ D = SPM_bipolar_montage(S,'BipM_');
 
 
 
+% these are for test
+D = spm_eeg_load();
+B = clone(D,'E:\mat\eeg\b_blank.mat');    %get the information from the entire edf file
+S.D = D;
+S.timewin = [19000 130000];
+S.prefix = 'a1a2'
+B  =spm_eeg_crop(S);
 
-for i = 1:10000
-    B(i)=i;
-end
-B = clone(D,'E:\mat\copy.mat');
+D=meeg(D);
+save(D);
+
+
+
+
 figure
-plot(B(:));
+plot(B(:,10000:190000));
 S.D = B;
 S.bc = 0;
 
@@ -73,10 +83,12 @@ D = spm_eeg_epochs(S);
 figure;
 plot(D(1,:,1));
 
+plot(D(20,18000:111000))
+
 
 
 D = spm_eeg_load();
-for i = 1:133 
+for i = 1:144 
 ChannelInd = i;
 Data = squeeze(D(ChannelInd,:,:));
 figure
