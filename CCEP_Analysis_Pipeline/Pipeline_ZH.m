@@ -1,58 +1,72 @@
+
+
+cd('/Users/Baotian/Desktop/Data/CCEP_data')
+cd('/Users/Baotian/Desktop/ToolBoxes/CCEP_Pipeline/CCEP_Analysis_Pipeline')
 spm('defaults', 'EEG');
+%% Parameters settings
+TimeWindow = [-500 1500];
+
+%% File IO
 % load the raw edf data and convert it to SPM format
 D = edf_TO_SPM_converter_GUI([],[],'meeg_');
 
 % load and convert the DC channel
-D = edf_TO_SPM_converter_GUI([],[],'DC_');
+DC = edf_TO_SPM_converter_GUI([],[],'DC_');
 
-% find the trigger
-D = spm_eeg_load();
-TriggerChannel = D(:);
-% Binarize
-maxTrigger = max(TriggerChannel);
-threshold = 0.3*maxTrigger;
-BinTrigger = (TriggerChannel >= threshold);
-timeStamps = diff(BinTrigger);
-timeStampNew = find(timeStamps == 1);
+%% Downsampling
+% Downsample the data to 1000 if > 1000Hz
+if D.fsample > 1003
+    clear S
+    S.D = D;
+    S.fsample_new = 1000;
+    D = spm_eeg_downsample(S);
+end
+if DC.fsample > 1003
+    clear S
+    S.D = DC;
+    S.fsample_new = 1000;
+    DC = spm_eeg_downsample(S);
+end
+
+%% epoch
+timeStampNew = FindCCEPTriggers(DC);
 
 % define the trl
-k_sample = D.fsample/1000;         %sampling rate is different!
-for i = 1:40
-    trl(i,1)=timeStampNew(i)-100*k_sample;
-    trl(i,2)=timeStampNew(i)+300*k_sample;
-    trl(i,3)=-100*k_sample;
+for i = 1:length(timeStampNew)
+    trl(i,1)=timeStampNew(i)*DC.fsample - 500;
+    trl(i,2)=timeStampNew(i)*DC.fsample + 1000;
+    trl(i,3)=-500;
 end
 
 % Epoching
-D = spm_eeg_load();
+clear S
 S.D = D;
 S.bc = 0;
 S.trl = trl;
 S.prefix = 'e';
 D = spm_eeg_epochs(S);
 
+
+%% baseline correction
+clear S
+S.D = D;
+D = spm_eeg_bc(S);    % when epoching we have the negtive time , so dont need to set the timewindow
+
+
 % filter
+clear S
 S.D = D;
 S.band = 'bandpass';
 S.freq = [1 300];
 D = spm_eeg_filter(S);
 
-% baseline correction
-S.D = D;
-D = spm_eeg_bc(S);    % when epoching we have the negtive time , so dont need to set the timewindow
-
 % rename the electrode
 Channel_Renaming_UI;  
 
                      % then delete the '-Ref' artificially
-
 % montage bipolar
 S = D;
 D = SPM_bipolar_montage(S,'BipM_');
-
-
-
-
 
 % these are for test
 D = spm_eeg_load();
