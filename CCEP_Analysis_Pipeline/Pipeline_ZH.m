@@ -53,22 +53,40 @@ S.D = D;
 D = spm_eeg_bc(S);    % when epoching we have the negtive time , so dont need to set the timewindow
 
 
-% filter
+%% filter
 clear S
 S.D = D;
 S.band = 'bandpass';
 S.freq = [1 300];
 D = spm_eeg_filter(S);
 
-% rename the electrode
+%% Filter the signal 4 times, minimal preprocessing the raw resting data
+% 1st, 2nd, 3rd, 4th are bandstop around 50Hz, 100Hz, 150Hz, 200Hz
+% respectively
+for i = 1:4
+    clear S
+    S.D              = D;
+    S.band           = 'stop';
+    S.freq           = [50*i-3 50*i+3];
+    S.order          = 5;
+    S.prefix         = 'f';
+    D = spm_eeg_filter(S);
+end
+
+%% rename the electrode
 Channel_Renaming_UI;  
 
                      % then delete the '-Ref' artificially
-% montage bipolar
+%% montage bipolar
 S = D;
 D = SPM_bipolar_montage(S,'BipM_');
 
-% these are for test
+
+
+
+
+
+%% these are for test
 D = spm_eeg_load();
 B = clone(D,'E:\mat\eeg\b_blank.mat');    %get the information from the entire edf file
 S.D = D;
