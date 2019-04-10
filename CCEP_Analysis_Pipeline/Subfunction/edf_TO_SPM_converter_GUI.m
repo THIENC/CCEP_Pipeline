@@ -22,6 +22,7 @@ if nargin < 3 || isempty(prefix)
 end
 
 filename_full = filename;
+edf_header = ft_read_header(filename_full);
 % convert the data
 S.dataset = filename_full;
 S.mode  = 'continuous';

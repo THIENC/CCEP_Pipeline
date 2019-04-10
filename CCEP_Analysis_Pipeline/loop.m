@@ -2,38 +2,37 @@
 
 spm('defaults', 'EEG');
 edfFiles = dir('*.edf');
-for i = 1:1                      %length(edfFiles)
+for i = 1:1                %length(edfFiles)
     mkdir(edfFiles(i).name(1:end-4));
     movefile(edfFiles(i).name,edfFiles(i).name(1:end-4));
     cd(edfFiles(i).name(1:end-4));
     %% File IO
     % load the raw edf data and convert it to SPM format
-    D = edf_TO_SPM_converter_GUI([],[],'meeg_');
+    index = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125];
+    D = edf_TO_SPM_converter_GUI(edfFiles(i).name,index,'meeg_');
 
     % load and convert the DC channel
-    DC = edf_TO_SPM_converter_GUI([],[],'DC_');
+    loc_DC = [41];
+    DC = edf_TO_SPM_converter_GUI(edfFiles(i).name,loc_DC,'DC_');
 
     %% rename the electrode
-    D = spm_eeg_load();
-    S.D = D;
-    S.Channel_Labels_Raw = S.D.chanlabels';
+    Channel_Labels_Raw = D.chanlabels';
 
-    S.Channel_Labels_New = Deblank_Names(S.Channel_Labels_Raw);
+    Channel_Labels_New = Deblank_Names(Channel_Labels_Raw);
 
     Pattern = '-Ref';
-    S.Channel_Labels_New = Remove_Name_Pattern(S.Channel_Labels_New,Pattern);
+    Channel_Labels_New = Remove_Name_Pattern(Channel_Labels_New,Pattern);
 
-    S.Channel_Labels_New = cellfun(@(x) x(3+1:end),S.Channel_Labels_New,'UniformOutput',false);
+    Channel_Labels_New = cellfun(@(x) x(3+1:end),Channel_Labels_New,'UniformOutput',false);
 
-    S.D = struct(S.D);
-    for i = 1:length(S.Channel_Labels_New)
-       S.D.channels(i).label = S.Channel_Labels_New{i};
+    D = struct(D);
+    for i = 1:length(Channel_Labels_New)
+        D.channels(i).label = Channel_Labels_New{i};
     end
-    S.D = meeg(S.D);
-    save(S.D);  
+    D = meeg(D);
+    save(D);
 
     %% Downsampling
-    D = spm_eeg_load();
     % Downsample the data to 1000 if > 1000Hz
     if D.fsample > 1003
     clear S
@@ -50,7 +49,7 @@ for i = 1:1                      %length(edfFiles)
 
     %% epoch
     timeStampNew = FindCCEPTriggers(DC);
-
+    close;
     % define the trl
     for i = 1:length(timeStampNew)
     trl(i,1)=timeStampNew(i)*DC.fsample - 500;
@@ -99,6 +98,19 @@ for i = 1:1                      %length(edfFiles)
     clear S
     S = D;
     D = SPM_bipolar_montage(S,'BipM_');
-
+    close;
+    %% plot 
+    for i = 1:length(D.chanlabels) 
+       ChannelInd = i;
+       Data = squeeze(D(ChannelInd,:,:));
+       figure
+       plot(Data)
+       %str1 = char(D.chanlabels(i))
+       title(D.chanlabels(i));
+       %set(gca,'FontSize',20)
+       %set(findobj(gca,'type','line'),'linew',4)
+       print(D.chanlabels{i},'-dpng')
+       close
+   end
    cd ..
 end
