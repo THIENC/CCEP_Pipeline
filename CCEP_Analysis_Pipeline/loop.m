@@ -109,6 +109,7 @@ for i = 1:1                %length(edfFiles)
        title(D.chanlabels(i));
        %set(gca,'FontSize',20)
        %set(findobj(gca,'type','line'),'linew',4)
+       set(gcf,'Position',[0 100 1920 600])
        print(D.chanlabels{i},'-dpng')
        close
    end
