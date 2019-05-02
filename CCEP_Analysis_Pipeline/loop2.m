@@ -16,7 +16,7 @@ cd('E:\CCEP')
 CCEPDir = dir(pwd);
 CCEPDir = CCEPDir(3:end);
 
-for Subjects = 1:length(CCEPDir)
+for Subjects = 7:13
     cd(CCEPDir(Subjects).name)
     edfFiles = dir('*.edf');
     for i = 1:length(edfFiles)

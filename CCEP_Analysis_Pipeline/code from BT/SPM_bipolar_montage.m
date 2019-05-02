@@ -43,7 +43,8 @@ end
 montage.tra = tra;
 montage.labelnew = labelnew;
 montage.labelorg = labelorg;
-spm_eeg_montage_ui(montage)
+% spm_eeg_montage_ui(montage) % Uncomment this line if you want to manually
+% check the montage pattern
 montage_file = montage;
 save('Bipolar_Montage_file','montage');
 
