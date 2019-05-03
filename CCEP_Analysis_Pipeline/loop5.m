@@ -10,13 +10,13 @@ cd(ScriptFolder)
 % SubjectFolder = 'E:\';
 cd(SubjectFolder)
 
-load('CCEPChannels.mat') 
+load('CCEPChannels.mat')
 cd('E:\CCEP')
 
 CCEPDir = dir(pwd);
 CCEPDir = CCEPDir(3:end);
 
-for Subjects = 2
+for Subjects = 5
     cd(CCEPDir(Subjects).name)
     edfFiles = dir('*.edf');
     for i = 1:length(edfFiles)
