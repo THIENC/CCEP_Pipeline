@@ -10,7 +10,7 @@ cd(ScriptFolder)
 % SubjectFolder = 'E:\';
 cd(SubjectFolder)
 
-load('CCEPChannels.mat')
+load('CCEPChannels.mat') 
 cd('E:\CCEP')
 
 CCEPDir = dir(pwd);
