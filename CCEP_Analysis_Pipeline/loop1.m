@@ -5,18 +5,18 @@ clear
 [ScriptFolder,SubjectFolder] = PathManipulation('BaotianZ620');
 
 % ScriptFolder = 'D:\EmotionalFaces';
-cd(ScriptFolder)
+% cd(ScriptFolder)
 
-% SubjectFolder = 'E:\';
+SubjectFolder = 'H:\';
 cd(SubjectFolder)
 
 load('CCEPChannels.mat')
-cd('E:\CCEP')
+cd('H:\CCEP')
 
 CCEPDir = dir(pwd);
 CCEPDir = CCEPDir(3:end);
 
-for Subjects = 1:6
+for Subjects = 11
     cd(CCEPDir(Subjects).name)
     edfFiles = dir('*.edf');
     for i = 1:length(edfFiles)
