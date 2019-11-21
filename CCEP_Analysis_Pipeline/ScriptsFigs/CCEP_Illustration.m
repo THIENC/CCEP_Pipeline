@@ -23,9 +23,9 @@ cfg=[];
 cfg.view='r';
 cfg.elecColors = [cdcol.carmine;cdcol.carmine;cdcol.emeraldgreen;cdcol.emeraldgreen];
 cfg.elecColorScale=[0 1];
-cfg.elecNames= StimPair;
+cfg.elecNames = StimPair;
 cfg.elecShape = 'marker';
-cfg.edgeBlack='n';
+cfg.edgeBlack ='n';
 cfg.ignoreDepthElec='n';
 cfg.opaqueness=0.2;
 
