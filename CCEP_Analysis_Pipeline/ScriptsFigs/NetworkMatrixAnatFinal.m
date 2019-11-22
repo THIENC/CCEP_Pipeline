@@ -1,11 +1,14 @@
-%% Path % Pamameters
+%% Path
 clear
 addpath(genpath('C:\Users\su_fe\Desktop\iELVis-master_BZ'))
-cd('E:\5.CCEP')
-
+%% Pamameters
+clear
+%%%%%%%%%%%%
+PatientID = 'PT002';
 FSFolder = 'E:\5.CCEP\2.CCEP_Freesurfer';
 ResultsFolder = 'E:\5.CCEP\1.CCEP_Results_Final';
-PatientID = 'PT002';
+
+
 % Channel Inclusion
 gLFile = [ResultsFolder filesep PatientID '_info\gL.mat'];
 flagFile = [ResultsFolder filesep PatientID '_info\flag.mat'];
@@ -13,6 +16,7 @@ flagFile = [ResultsFolder filesep PatientID '_info\flag.mat'];
 ssFile = [ResultsFolder filesep PatientID '\PTXXX_ss.mat'];
 M_greyFile = [ResultsFolder filesep PatientID '\PTXXX_Matrix_grey.mat'];
 
+cd([ResultsFolder filesep PatientID])
 % EIExcelFile = 'C:\Users\su_fe\Desktop\20190429_CCEP_Projects\Data\PT005\PT005_Onset_EI.xlsx';
 % ChanFile = 'C:\Users\su_fe\Desktop\20190429_CCEP_Projects\Data\PT005\PTXXX_Channels.mat';
 
@@ -35,28 +39,16 @@ for i = 1:length(groupLabels)
 end
 
 % To load the included channel names using regular expression
-
-% Make Channel information
-Channels.EI = [];
-Channels.tag = [];
-for i = 1:length(txt)
-    Ind1 = find(contains({Channels(:).id},txt{i}(2:end-1)));
-    Channels(Ind1).EI = num(i,3);
-    Channels(Ind1).tag = num(i,1);
-end
-    
-IncludeCount = 0;
-for i = find([Channels.keep])
-    IncludeCount = IncludeCount + 1;
-    [startIndex,~] = regexp(Channels(i).id,'\S\d');
-    ChannelIncluded{IncludeCount,1} = Channels(i).id(startIndex(1) : startIndex(2) - 1);
-    EIIncluded(IncludeCount,1) = Channels(i).EI;
-    Categorization(IncludeCount,1) = Channels(i).tag;
+for i = 1:length(ss)
+    [startIndex,~] = regexp(ss(i).chan,'\S\d');
+    ChannelIncluded{i,1} = ss(i).chan(startIndex(1) : startIndex(2) - 1);
+    EIIncluded(i,1) = ss(i).EI;
+    Categorization(i,1) = ss(i).tag;
 end
 
 %% %%%%%%% Plot the matrix %%%%%%%%%%%%%%
 
-
+% Set NaNs to the matrix
 for i = 1:length(EIIncluded)
     % Identify electrode in one electrode shaft
     ElectrodeShaftName = ChannelIncluded{i}(isletter(ChannelIncluded{i}));
@@ -66,13 +58,73 @@ for i = 1:length(EIIncluded)
     end
 end
 
+% Manual check and label then save
+% Plot for manual exclude extreme values
 figure
-pcolor(M_grey)
-axis ij
-colormap jet
 imagesc(M_grey,'AlphaData',~isnan(M_grey))
 colormap jet
 grid on
+xticks(1:size(M_grey,1))
+yticks(1:size(M_grey,2))
+xticklabels(ChannelIncluded)
+yticklabels(ChannelIncluded)
+title('Raw unsorted')
+
+save('PTXXX_Matrix_grey_Final.mat','M_grey')
+load('PTXXX_Matrix_grey_Final.mat')
+
+% 1st sort according to group
+[CategorizationSorted, Index1] = sort(Categorization);
+ChannelIncludedSorted1 = ChannelIncluded(Index1);
+EIIncludedSorted1      = EIIncluded(Index1);
+M_greySorted1          = M_grey(Index1,:);
+
+% figure
+% imagesc(M_greySorted1,'AlphaData',~isnan(M_greySorted1))
+% colormap jet
+% grid on
+% xticks(1:size(M_greySorted1,1))
+% yticks(1:size(M_greySorted1,2))
+% xticklabels(ChannelIncludedSorted1)
+% yticklabels(ChannelIncludedSorted1)
+% title('First sorted')
+
+save('PTXXX_Matrix_grey_Final_Sorted.mat','M_greySorted1')
+load('PTXXX_Matrix_grey_Final_Sorted.mat')
+ChannelsSorted.
+% % 2nd sort according to EI value with each categorization
+% for i = 1:3
+%     CateNum = find(CategorizationSorted == i);
+%     [EIIncludedSorted2(CateNum), IndexTemp] = sort(EIIncludedSorted1(CateNum),'descend');
+%     ChannelIncludedtemp = ChannelIncludedSorted1(CateNum);
+%     ChannelIncludedSorted2(CateNum) = ChannelIncludedtemp(IndexTemp);
+%     M_greySortedTemp = M_greySorted1(CateNum,:);
+%     M_greySorted2(CateNum,:) = M_greySortedTemp(IndexTemp,:);    
+% end
+% 
+% figure
+% imagesc(M_greySorted2,'AlphaData',~isnan(M_greySorted2))
+% colormap jet
+% grid on
+% xticks(1:size(M_greySorted2,1))
+% yticks(1:size(M_greySorted2,2))
+% xticklabels(ChannelIncludedSorted2)
+% yticklabels(ChannelIncludedSorted2)
+% title('Second sorted')
+
+% Plot the final sorted matrix
+figure
+imagesc(M_greySorted1,'AlphaData',~isnan(M_greySorted1))
+colormap jet
+grid on
+xticks(1.5:size(M_greySorted1,1)+0.5)
+yticks(1.5:size(M_greySorted1,2)+0.5)
+ax = gca;
+ax.LineWidth = 3
+axis square
+% Make the seperating line for each cell
+
+% Make the seperating line for each group
 
 %% %%%%%%%%%%%%% STIMULATION %%%%%%%%%%%%%%%%%%%%%%%
 
