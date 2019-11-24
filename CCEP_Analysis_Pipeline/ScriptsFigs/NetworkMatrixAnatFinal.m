@@ -4,7 +4,8 @@ addpath(genpath('C:\Users\su_fe\Desktop\iELVis-master_BZ'))
 %% Pamameters
 clear
 %%%%%%%%%%%%
-PatientID = 'PT002';
+PatientID = 'PT055';
+SideImp = 'l';
 FSFolder = 'E:\5.CCEP\2.CCEP_Freesurfer';
 ResultsFolder = 'E:\5.CCEP\1.CCEP_Results_Final';
 
@@ -38,21 +39,29 @@ for i = 1:length(groupLabels)
     groupLabelsRaw{i,1} = groupLabels{i}(7:end);
 end
 
+
 % To load the included channel names using regular expression
 for i = 1:length(ss)
-    [startIndex,~] = regexp(ss(i).chan,'\S\d');
-    ChannelIncluded{i,1} = ss(i).chan(startIndex(1) : startIndex(2) - 1);
+    startIndex = min(find(isletter(ss(i).chan)));
+    endIndex   = find(diff(isletter(ss(i).chan)) == 1);
+    ChannelIncluded{i,1} = ss(i).chan(startIndex : endIndex);
     EIIncluded(i,1) = ss(i).EI;
     Categorization(i,1) = ss(i).tag;
 end
-
+groupLabelsRaw
+ChannelIncluded
 %% %%%%%%% Plot the matrix %%%%%%%%%%%%%%
+
 
 % Set NaNs to the matrix
 for i = 1:length(EIIncluded)
     % Identify electrode in one electrode shaft
     ElectrodeShaftName = ChannelIncluded{i}(isletter(ChannelIncluded{i}));
-    ConnectElectrodes = find(contains(ChannelIncluded,ElectrodeShaftName));
+    ElecLetters = cellfun(@(x) isletter(x), ChannelIncluded, 'UniformOutput', false);
+    for j = 1:length(ElecLetters)
+        ChannelIncludedName{j,1} = ChannelIncluded{j}(ElecLetters{j});
+    end
+    ConnectElectrodes = find(strcmp(ChannelIncludedName,ElectrodeShaftName));
     for a = 1:length(ConnectElectrodes)
         M_grey(i,ConnectElectrodes(a)) = nan;
     end
@@ -73,11 +82,11 @@ title('Raw unsorted')
 save('PTXXX_Matrix_grey_Final.mat','M_grey')
 load('PTXXX_Matrix_grey_Final.mat')
 
-% 1st sort according to group
+%% 1st sort according to group
 [CategorizationSorted, Index1] = sort(Categorization);
 ChannelIncludedSorted1 = ChannelIncluded(Index1);
 EIIncludedSorted1      = EIIncluded(Index1);
-M_greySorted1          = M_grey(Index1,:);
+M_greySorted1          = M_grey(Index1,Index1);
 
 % figure
 % imagesc(M_greySorted1,'AlphaData',~isnan(M_greySorted1))
@@ -91,7 +100,13 @@ M_greySorted1          = M_grey(Index1,:);
 
 save('PTXXX_Matrix_grey_Final_Sorted.mat','M_greySorted1')
 load('PTXXX_Matrix_grey_Final_Sorted.mat')
-ChannelsSorted.
+for i = 1:length(EIIncludedSorted1)
+    ChannelsSorted(i).EI = EIIncludedSorted1(i);
+    ChannelsSorted(i).chan = ChannelIncludedSorted1{i};
+    ChannelsSorted(i).tag = CategorizationSorted(i);
+end
+save('PTXXX_Matrix_Channels_Final_Sorted.mat','ChannelsSorted')
+load('PTXXX_Matrix_Channels_Final_Sorted.mat')
 % % 2nd sort according to EI value with each categorization
 % for i = 1:3
 %     CateNum = find(CategorizationSorted == i);
@@ -112,79 +127,118 @@ ChannelsSorted.
 % yticklabels(ChannelIncludedSorted2)
 % title('Second sorted')
 
+%%
 % Plot the final sorted matrix
 figure
-imagesc(M_greySorted1,'AlphaData',~isnan(M_greySorted1))
+imagesc(M_greySorted1/max(M_greySorted1(:)),'AlphaData',~isnan(M_greySorted1))
 colormap jet
 grid on
+colorbar
 xticks(1.5:size(M_greySorted1,1)+0.5)
 yticks(1.5:size(M_greySorted1,2)+0.5)
+xticklabels(ChannelIncludedSorted1)
+yticklabels(ChannelIncludedSorted1)
+xtickangle(90)
+set(gca,'TickLength',[0 0])
+
+title([PatientID '-SortedMatrix-' 'EZ-PZ-NIZ'])
+
 ax = gca;
 ax.LineWidth = 3
 axis square
-% Make the seperating line for each cell
-
 % Make the seperating line for each group
+hold on
+%
+line([0.5 size(M_greySorted1,1)+0.5],...
+     [length(find(CategorizationSorted == 1)) + 0.5 length(find(CategorizationSorted == 1)) + 0.5],'LineWidth',3,'Color','k')
+line([0.5 size(M_greySorted1,1)+0.5],...
+     [length(find(CategorizationSorted ~= 3)) + 0.5 length(find(CategorizationSorted ~= 3)) + 0.5],'LineWidth',3,'Color','k')
+%
+line([length(find(CategorizationSorted == 1)) + 0.5 length(find(CategorizationSorted == 1)) + 0.5],...
+     [0.5 size(M_greySorted1,1)+0.5],'LineWidth',3,'Color','k')
+line([length(find(CategorizationSorted ~= 3)) + 0.5 length(find(CategorizationSorted ~= 3)) + 0.5],...
+     [0.5 size(M_greySorted1,1)+0.5],'LineWidth',3,'Color','k')
+set(gcf,'Position',[0 100 1000 1000])
+print([PatientID '_SortedMatrix'],'-r600','-dpng')
+close
 
+ 
 %% %%%%%%%%%%%%% STIMULATION %%%%%%%%%%%%%%%%%%%%%%%
-
-EvockedPotentials = [];
-for i = 1:length(EIIncluded)
-    
-    ct1 = 0;
-    % Identify electrode in one electrode shaft
-    ElectrodeShaftName = ChannelIncluded{i}(isletter(ChannelIncluded{i}));
-    ConnectElectrodes = find(~contains(ChannelIncluded,ElectrodeShaftName));
-    for a = 1:length(ConnectElectrodes)
-        ct1 = ct1 + 1;
-        EvockedPotentials(ct1,i) = M_grey(i,ConnectElectrodes(a));
-    end
+switch PatientID
+    case 'PT008'
+        groupLabelsRaw2 = groupLabelsRaw;
+        for i = 1:length(groupLabelsRaw)
+            groupLabelsRaw2{i}(strfind(groupLabelsRaw{i},"'")) = [];
+            groupLabelsRawNew{i,1} = lower(groupLabelsRaw2{i})
+        end
+        for j = 1:32
+            groupLabelsRawNew{j}(2) = 'o';
+        end
+        for k = 1:length(ChannelIncludedSorted1)
+            ChannelIncludedSorted1{k,1} = groupLabelsRaw{find(ismember(groupLabelsRawNew,ChannelIncludedSorted1{k}))}
+        end
+    case 'PT010'
+        ChannelIncludedSorted1 = upper(ChannelIncludedSorted1);
+    case 'PT014'
+        ChannelIncludedSorted1 = upper(ChannelIncludedSorted1);
+    case 'PT049'
+        ChannelIncludedSorted1{1}(1:2) = 'aO';
+        ChannelIncludedSorted1{7}(1:2) = 'aO';
+        ChannelIncludedSorted1{8}(1:2) = 'aO';
+        ChannelIncludedSorted1{9}(1:2) = 'aO';
+        ChannelIncludedSorted1{10}(1:2) = 'aO';
+        
+        ChannelIncludedSorted1{11}(1:2) = 'pO';
+        ChannelIncludedSorted1{12}(1:2) = 'pO';
+        ChannelIncludedSorted1{13}(1:2) = 'pO';
+        ChannelIncludedSorted1{14}(1:2) = 'pO';
+        
 end
-figure
-histogram(EvockedPotentials)
-% M_grey = M_grey - min(EvockedPotentials);
-% EvockedPotentials = EvockedPotentials - min(EvockedPotentials);
 
-AbsMaxCCEP = max(EvockedPotentials(:));
+%% Stimulating
+AbsMaxCCEP = max(M_greySorted1(:));
+
 
 mkdir('Stimulation')
 cd('Stimulation')
-for i = 1:length(EIIncluded)
+for i = 1:length(EIIncludedSorted1)
     pairs=[];
     ct=0;
-    % Identify electrode in one electrode shaft
-    ElectrodeShaftName = ChannelIncluded{i}(isletter(ChannelIncluded{i}));
-    ConnectElectrodes = find(~contains(ChannelIncluded,ElectrodeShaftName));
-    for a = 1:length(ConnectElectrodes)
+    for a = 1:length(EIIncludedSorted1)
+        % Remove some empty pairs
+        if isnan(M_greySorted1(i,a))
+            continue
+        end
         ct = ct + 1;
-        pairs{ct,1} = ChannelIncluded{i};
-        pairs{ct,2} = ChannelIncluded{ConnectElectrodes(a)};
+        pairs{ct,1} = ChannelIncludedSorted1{i};
+        pairs{ct,2} = ChannelIncludedSorted1{a};
         pairs{ct,3} = [0.6 0.6 0.6]; % RGB val
-        pairs{ct,4} = 'R';
-        pairs{ct,6} = M_grey(i,ConnectElectrodes(a));
+        pairs{ct,4} = upper(SideImp);
+        pairs{ct,6} = M_greySorted1(i,a);
     end
+    
     lineWidth = (max([pairs{:,6}])/AbsMaxCCEP) * 8;
     cfg = [];
-    cfg.view = 'romni';
-    cfg.figId = 2;
+    cfg.view = [SideImp 'omni'];
+%     cfg.figId = 2;
     cfg.lineWidth = lineWidth;
     cfg.pairs = pairs;
     % Color the electrodes according to EI value
-    cfg.elecColors = EIIncluded;
+    cfg.elecColors = EIIncludedSorted1;
     cfg.elecColorScale = [0 1];
-    cfg.elecNames = ChannelIncluded;
+    cfg.elecNames = ChannelIncludedSorted1;
     % 
     cfg.elecShape = 'marker';
     cfg.edgeBlack='n';
     cfg.ignoreDepthElec='n';
-    cfg.ignoreChans = setdiff(groupLabelsRaw,ChannelIncluded);
+    cfg.ignoreChans = setdiff(groupLabelsRaw,ChannelIncludedSorted1);
     cfg.opaqueness=0.03;
     cfg.showLabels='n';
     cfg.elecUnits='EI';
-    cfg.title= [PatientID '-Stimulating-' ChannelIncluded{i} '-Group-' num2str(Categorization(i))];
+    cfg.title= [PatientID '-Stimulating-' ChannelIncludedSorted1{i} '-Group-' num2str(CategorizationSorted(i)) '-EI:' num2str(EIIncludedSorted1(i))];
     cfgOut = plotPialSurf(PatientID,cfg);
     set(gcf,'Position',[0 0 1920 1200])
-    print(['Group-' num2str(Categorization(i)),'-', PatientID '-Stimulating-' ChannelIncluded{i}],'-r300','-dpng')
+    print(['Group-' num2str(CategorizationSorted(i)),'-', PatientID '-Stimulating-' ChannelIncludedSorted1{i}],'-r300','-dpng')
     
     close 
     
@@ -194,46 +248,50 @@ cd ..
 %% %%%%%%%%%%%%% RECORDING %%%%%%%%%%%%%%%%%%%%%%%
 mkdir('Recording')
 cd('Recording')
-for i = 1:length(EIIncluded)
+for i = 1:length(EIIncludedSorted1)
     pairs=[];
     ct=0;
-    % Identify electrode in one electrode shaft
-    ElectrodeShaftName = ChannelIncluded{i}(isletter(ChannelIncluded{i}));
-    ConnectElectrodes = find(~contains(ChannelIncluded,ElectrodeShaftName));
-    for a = 1:length(ConnectElectrodes)
+    for a = 1:length(EIIncludedSorted1)
+        % Remove some empty pairs
+        if isnan(M_greySorted1(a,i))
+            continue
+        end
         ct = ct + 1;
-        pairs{ct,1} = ChannelIncluded{i};
-        pairs{ct,2} = ChannelIncluded{ConnectElectrodes(a)};
+        pairs{ct,1} = ChannelIncludedSorted1{i};
+        pairs{ct,2} = ChannelIncludedSorted1{a};
         pairs{ct,3} = [0.6 0.6 0.6]; % RGB val
-        pairs{ct,4} = 'R';
-        pairs{ct,6} = M_grey(ConnectElectrodes(a),i);
+        pairs{ct,4} = upper(SideImp);
+        pairs{ct,6} = M_greySorted1(a,i);
     end
+    
     lineWidth = (max([pairs{:,6}])/AbsMaxCCEP) * 8;
-    cfg=[];
-    cfg.view='romni';
-    cfg.figId=2;
+    cfg = [];
+    cfg.view = [SideImp 'omni'];
+    cfg.figId = 2;
     cfg.lineWidth = lineWidth;
-    cfg.pairs=pairs;
+    cfg.pairs = pairs;
     % Color the electrodes according to EI value
-    cfg.elecColors = EIIncluded;
+    cfg.elecColors = EIIncludedSorted1;
     cfg.elecColorScale = [0 1];
-    cfg.elecNames = ChannelIncluded;
+    cfg.elecNames = ChannelIncludedSorted1;
     % 
     cfg.elecShape = 'marker';
     cfg.edgeBlack='n';
     cfg.ignoreDepthElec='n';
-    cfg.ignoreChans = setdiff(groupLabelsRaw,ChannelIncluded);
+    cfg.ignoreChans = setdiff(groupLabelsRaw,ChannelIncludedSorted1);
     cfg.opaqueness=0.03;
     cfg.showLabels='n';
     cfg.elecUnits='EI';
-    cfg.title= [PatientID '-Recording-' ChannelIncluded{i} '-Group-' num2str(Categorization(i))];
+    cfg.title= [PatientID '-Recording-' ChannelIncludedSorted1{i} '-Group-' num2str(CategorizationSorted(i)) '-EI:' num2str(EIIncludedSorted1(i))];
     cfgOut = plotPialSurf(PatientID,cfg);
     set(gcf,'Position',[0 0 1920 1200])
-    print(['Group-' num2str(Categorization(i)),'-',PatientID '-Recording-' ChannelIncluded{i}],'-r300','-dpng')
+    print(['Group-' num2str(CategorizationSorted(i)),'-', PatientID '-Recording-' ChannelIncludedSorted1{i}],'-r300','-dpng')
+    
     close 
     
 end
 cd ..
+
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
