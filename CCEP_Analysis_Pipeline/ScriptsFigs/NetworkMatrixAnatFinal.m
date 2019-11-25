@@ -4,7 +4,7 @@ addpath(genpath('C:\Users\su_fe\Desktop\iELVis-master_BZ'))
 %% Pamameters
 clear
 %%%%%%%%%%%%
-PatientID = 'PT055';
+PatientID = 'PT038';
 SideImp = 'l';
 FSFolder = 'E:\5.CCEP\2.CCEP_Freesurfer';
 ResultsFolder = 'E:\5.CCEP\1.CCEP_Results_Final';
@@ -34,6 +34,8 @@ load(gLFile)
 load(flagFile)
 load(ssFile)
 load(M_greyFile)
+%%
+save('PTXXX_ss.mat','ss')
 %% Make derivatives
 for i = 1:length(groupLabels)
     groupLabelsRaw{i,1} = groupLabels{i}(7:end);
@@ -144,7 +146,7 @@ set(gca,'TickLength',[0 0])
 title([PatientID '-SortedMatrix-' 'EZ-PZ-NIZ'])
 
 ax = gca;
-ax.LineWidth = 3
+ax.LineWidth = 3;
 axis square
 % Make the seperating line for each group
 hold on
@@ -192,12 +194,29 @@ switch PatientID
         ChannelIncludedSorted1{12}(1:2) = 'pO';
         ChannelIncludedSorted1{13}(1:2) = 'pO';
         ChannelIncludedSorted1{14}(1:2) = 'pO';
+    case 'PT057'
+        ChannelIncludedSorted1{1}(1:2) = 'pO';
+        ChannelIncludedSorted1{2}(1:2) = 'pO';
+        ChannelIncludedSorted1{3}(1:2) = 'pO';
+                
+        ChannelIncludedSorted1{6}(1:2) = 'aO';
+        ChannelIncludedSorted1{7}(1:2) = 'aO';
+        ChannelIncludedSorted1{24}(1:2) = 'aO';
+        ChannelIncludedSorted1{25}(1:2) = 'aO';
+    case 'PT059'
+        ChannelIncludedSorted1{19}(1:2) = 'pO';
+        ChannelIncludedSorted1{20}(1:2) = 'pO';
+        ChannelIncludedSorted1{21}(1:2) = 'pO';
+    case 'PT015'
+        EIIncludedSorted1 = EIIncludedSorted1/max(EIIncludedSorted1);
+    case 'PT038'
+        ChannelIncludedSorted1 = upper(ChannelIncludedSorted1);
         
+  
 end
 
 %% Stimulating
 AbsMaxCCEP = max(M_greySorted1(:));
-
 
 mkdir('Stimulation')
 cd('Stimulation')
