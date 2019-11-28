@@ -150,30 +150,30 @@ end
 
 cd('J:\CCEP\CCEP_Raw_057\AO1AO2')
 D = spm_eeg_load();
-i = 17;
+i = 91;
 
-for i = 1:length(D.chanlabels)
-    ChannelInd = i;
-    Data = squeeze(D(ChannelInd,:,:));
-    figure
-    for j = 1:D.ntrials
-        ColorJet = flipud(jet(D.ntrials));
-        %         plot(D.time,Data(:,j),'Color',[1 1 1]/j);
-        plot(D.time,Data(:,j),'Color',ColorJet(j,:));
-        hold on
-    end
-    grid on
-    % plot(D.time,mean(Data,2),'LineWidth',2,'Color','r','LineStyle','--')
 
-    title(D.chanlabels(i));
-    set(gca,'FontSize',14)
-
-    set(gcf,'Position',[0 100 1920 600])
-    colorbar
-    colormap('jet')
-    print(D.chanlabels{i},'-dpng')
-    close
+ChannelInd = i;
+Data = squeeze(D(ChannelInd,:,:));
+figure
+for j = 1:D.ntrials
+    ColorJet = flipud(jet(D.ntrials));
+    %         plot(D.time,Data(:,j),'Color',[1 1 1]/j);
+    plot(D.time,Data(:,j),'Color',ColorJet(j,:));
+    hold on
 end
+grid on
+% plot(D.time,mean(Data,2),'LineWidth',2,'Color','r','LineStyle','--')
+
+title(D.chanlabels(i));
+set(gca,'FontSize',14)
+
+set(gcf,'Position',[0 100 1920 600])
+colorbar
+colormap('jet')
+print(D.chanlabels{i},'-dpng')
+close
+
 figure
 plot(D.time,mean(Data(:,1:20),2),'Color','r');
 hold on
