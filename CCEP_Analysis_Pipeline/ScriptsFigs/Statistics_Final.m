@@ -110,6 +110,153 @@ boxplot([EZRecord,PZRecord,NIZRecord])
 title('Recording')
 [h,p] = ttest2(EZRecord,NIZRecord);
 
-%%
+%% Prognostic analysis
+Outcome = [1 1 1 2 4 1 1 2 1 2 3 1 1 1 1 1 1 3 2 1 1 1 1 1 1 ]';
 
+figure
+scatter(EZStim,Outcome)
+[rho,pval] = corr(EZStim,Outcome)
+figure
+scatter(PZStim,Outcome)
+[rho,pval] = corr(PZStim,Outcome)
+figure
+scatter(NIZStim,Outcome)
+[rho,pval] = corr(NIZStim,Outcome)
+
+
+
+figure
+scatter(EZRecord,Outcome)
+[rho,pval] = corr(EZRecord,Outcome)
+figure
+scatter(PZRecord,Outcome)
+[rho,pval] = corr(PZRecord,Outcome)
+figure
+scatter(NIZRecord,Outcome)
+
+[rho,pval] = corr(NIZRecord,Outcome)
+
+%%%%%%%%%%% Binary outcome
+OutcomeBi = [Outcome ==1];
+
+figure
+scatter(EZStim,OutcomeBi)
+[rho,pval] = corr(EZStim,OutcomeBi)
+figure
+scatter(PZStim,OutcomeBi)
+[rho,pval] = corr(PZStim,OutcomeBi)
+figure
+scatter(NIZStim,OutcomeBi)
+[rho,pval] = corr(NIZStim,OutcomeBi)
+
+
+
+figure
+scatter(EZRecord,OutcomeBi)
+[rho,pval] = corr(EZRecord,OutcomeBi)
+figure
+scatter(PZRecord,OutcomeBi)
+[rho,pval] = corr(PZRecord,OutcomeBi)
+figure
+scatter(NIZRecord,OutcomeBi)
+[rho,pval] = corr(NIZRecord,OutcomeBi)
+
+
+% % Logistic regression
+% [B,dev,stats] = mnrfit([EZStim PZStim],categorical(OutcomeBi))
+
+
+p = ranksum(mean([EZStim(OutcomeBi) PZStim(OutcomeBi)],2),mean([EZStim(~OutcomeBi) PZStim(~OutcomeBi)],2))
+
+p = ranksum(mean([EZRecord(OutcomeBi) PZRecord(OutcomeBi)],2),mean([EZRecord(~OutcomeBi) PZRecord(~OutcomeBi)],2))
+
+mean(mean([EZRecord(OutcomeBi) PZRecord(OutcomeBi)],2))
+mean(mean([EZRecord(~OutcomeBi) PZRecord(~OutcomeBi)],2))
+
+
+p1 = ranksum(EZStim(OutcomeBi),EZStim(~OutcomeBi))
+p2 = ranksum(PZStim(OutcomeBi),PZStim(~OutcomeBi))
+p3 = ranksum(NIZStim(OutcomeBi),NIZStim(~OutcomeBi))
+
+p4 = ranksum(EZRecord(OutcomeBi),EZRecord(~OutcomeBi))
+p5 = ranksum(PZRecord(OutcomeBi),PZRecord(~OutcomeBi))
+p6 = ranksum(NIZRecord(OutcomeBi),NIZRecord(~OutcomeBi))
+
+% EZ
+p = ranksum(EZ2EZ(OutcomeBi),EZ2EZ(~OutcomeBi))
+mean(EZ2EZ(OutcomeBi))
+mean(EZ2EZ(~OutcomeBi))
+p = ranksum(EZ2PZ(OutcomeBi),EZ2PZ(~OutcomeBi))
+
+p = ranksum(EZ2NIZ(OutcomeBi),EZ2NIZ(~OutcomeBi))
+mean(EZ2NIZ(OutcomeBi))
+mean(EZ2NIZ(~OutcomeBi))
+% PZ
+p = ranksum(PZ2EZ(OutcomeBi),PZ2EZ(~OutcomeBi))
+
+p = ranksum(PZ2PZ(OutcomeBi),PZ2PZ(~OutcomeBi))
+
+p = ranksum(PZ2NIZ(OutcomeBi),PZ2NIZ(~OutcomeBi))
+
+% NIZ
+p = ranksum(NIZ2EZ(OutcomeBi),NIZ2EZ(~OutcomeBi))
+
+p = ranksum(NIZ2PZ(OutcomeBi),NIZ2PZ(~OutcomeBi))
+
+p = ranksum(NIZ2NIZ(OutcomeBi),NIZ2NIZ(~OutcomeBi))
+
+%%% Write CSV file
+% EZ2EZ ----------------------------------------
+Stim_R_F = [];
+Outputname = 'Prog_EZ2EZ.csv';
+Stim_R_F = [EZ2EZ, OutcomeBi];
+csvwrite(Outputname,Stim_R_F)
+% EZ2PZ
+Stim_R_F = [];
+Outputname = 'Prog_EZ2PZ.csv';
+Stim_R_F = [EZ2PZ, OutcomeBi];
+csvwrite(Outputname,Stim_R_F)
+% EZ2NIZ
+Stim_R_F = [];
+Outputname = 'Prog_EZ2NIZ.csv';
+Stim_R_F = [EZ2NIZ, OutcomeBi];
+csvwrite(Outputname,Stim_R_F)
+
+% PZ2EZ ---------------------------------------
+Stim_R_F = [];
+Outputname = 'Prog_PZ2EZ.csv';
+Stim_R_F = [PZ2EZ, OutcomeBi];
+csvwrite(Outputname,Stim_R_F)
+% PZ2PZ
+Stim_R_F = [];
+Outputname = 'Prog_PZ2PZ.csv';
+Stim_R_F = [PZ2PZ, OutcomeBi];
+csvwrite(Outputname,Stim_R_F)
+% PZ2NIZ
+Stim_R_F = [];
+Outputname = 'Prog_PZ2NIZ.csv';
+Stim_R_F = [PZ2NIZ, OutcomeBi];
+csvwrite(Outputname,Stim_R_F)
+% NIZ2EZ --------------------------------------
+Stim_R_F = [];
+Outputname = 'Prog_NIZ2EZ.csv';
+Stim_R_F = [NIZ2EZ, OutcomeBi];
+csvwrite(Outputname,Stim_R_F)
+% NIZ2PZ
+Stim_R_F = [];
+Outputname = 'Prog_NIZ2PZ.csv';
+Stim_R_F = [NIZ2PZ, OutcomeBi];
+csvwrite(Outputname,Stim_R_F)
+% NIZ2NIZ
+Stim_R_F = [];
+Outputname = 'Prog_NIZ2NIZ.csv';
+Stim_R_F = [NIZ2NIZ, OutcomeBi];
+csvwrite(Outputname,Stim_R_F)
+%%
+p2 = ranksum(PZStim(OutcomeBi),PZStim(~OutcomeBi))
+p3 = ranksum(NIZStim(OutcomeBi),NIZStim(~OutcomeBi))
+
+p4 = ranksum(EZRecord(OutcomeBi),EZRecord(~OutcomeBi))
+p5 = ranksum(PZRecord(OutcomeBi),PZRecord(~OutcomeBi))
+p6 = ranksum(NIZRecord(OutcomeBi),NIZRecord(~OutcomeBi))
 

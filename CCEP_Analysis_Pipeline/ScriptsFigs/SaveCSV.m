@@ -15,6 +15,15 @@ for i = 1:25
     Zscored(3,3,i) = NIZ2NIZ(i,1)
 end
 
+%%%%%%%%%%% mean and sd
+mean(NIZ2NIZ)
+std(NIZ2NIZ)
+%#################
+[min(NIZ2NIZ) max(NIZ2NIZ)]
+
+%%%%%%%%%%%%%
+
+
 
 Outputname = 'Zscored.csv';
 
