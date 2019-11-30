@@ -25,3 +25,25 @@ for i = 1:25
 
     cd ..
 end
+
+%% 
+%
+EZStim = mean([EZ2EZ,EZ2PZ,EZ2NIZ],2);
+PZStim = mean([PZ2EZ,PZ2PZ,PZ2NIZ],2);
+NIZStim = mean([NIZ2EZ,NIZ2PZ,NIZ2NIZ],2);
+%
+EZRecord = mean([EZ2EZ,PZ2EZ,NIZ2EZ],2);
+PZRecord = mean([EZ2PZ,PZ2PZ,NIZ2PZ],2);
+NIZRecord = mean([EZ2NIZ,PZ2NIZ,NIZ2NIZ],2);
+
+
+
+
+
+
+
+
+
+
+
+

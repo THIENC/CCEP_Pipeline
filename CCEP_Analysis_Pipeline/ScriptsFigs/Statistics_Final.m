@@ -110,6 +110,26 @@ boxplot([EZRecord,PZRecord,NIZRecord])
 title('Recording')
 [h,p] = ttest2(EZRecord,NIZRecord);
 
+%%
+median(EZStim)
+[min(EZStim) max(EZStim)]
+
+median(PZStim)
+[min(PZStim) max(PZStim)]
+
+median(NIZStim)
+[min(NIZStim) max(NIZStim)]
+
+%
+median(EZRecord)
+[min(EZRecord) max(EZRecord)]
+
+median(PZRecord)
+[min(PZRecord) max(PZRecord)]
+
+median(NIZRecord)
+[min(NIZRecord) max(NIZRecord)]
+
 %% Prognostic analysis
 Outcome = [1 1 1 2 4 1 1 2 1 2 3 1 1 1 1 1 1 3 2 1 1 1 1 1 1 ]';
 
@@ -149,7 +169,13 @@ figure
 scatter(NIZStim,OutcomeBi)
 [rho,pval] = corr(NIZStim,OutcomeBi)
 
+%%%%%%%%%%%%%%%%%%%%%%%
+median(EZ2EZ(OutcomeBi))
+[max(EZ2EZ(OutcomeBi)) min(EZ2EZ(OutcomeBi))]
 
+median(EZ2EZ(~OutcomeBi))
+[max(EZ2EZ(~OutcomeBi)) min(EZ2EZ(~OutcomeBi))]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
 scatter(EZRecord,OutcomeBi)
